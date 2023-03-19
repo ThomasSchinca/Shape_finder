@@ -9,7 +9,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 import plotly.express as px
-from dash import Dash, html, Input, Output, State, callback_context,dcc
+from dash import Dash, html, Input, Output, State,dcc
 import dash_bootstrap_components as dbc
 from dtaidistance import dtw,ed
 import bisect
@@ -19,30 +19,8 @@ from dateutil.relativedelta import relativedelta
 # Dataset Fatalities
 # =============================================================================
 
-
-df = pd.read_csv("https://ucdp.uu.se/downloads/ged/ged221-csv.zip",
-                 parse_dates=['date_start','date_end'],low_memory=False)
-df_tot = pd.DataFrame(columns=df.country.unique(),index=pd.date_range(df.date_start.min(),
-                                          df.date_end.max()))
-df_tot=df_tot.fillna(0)
-for i in df.country.unique():
-    df_sub=df[df.country==i]
-    for j in range(len(df_sub)):
-        if df_sub.date_start.iloc[j] == df_sub.date_end.iloc[j]:
-            df_tot.loc[df_sub.date_start.iloc[j],i]=df_tot.loc[df_sub.date_start.iloc[j],i]+df_sub.best.iloc[j]
-        else:
-            df_tot.loc[df_sub.date_start.iloc[j]:
-            df_sub.date_end.iloc[j],i]=df_tot.loc[df_sub.date_start.iloc[j]: \
-                                                  df_sub.date_end.iloc[j],i]+ \
-                                                  df_sub.best.iloc[j]/ \
-                                                  (df_sub.date_end.iloc[j]- \
-                                                  df_sub.date_start.iloc[j]).days 
-
-df_tot_m=df_tot.resample('M').sum()
-df_tot=df_tot.resample('W').sum()   
+df_tot_m=pd.read_csv('df_tot_m.csv',parse_dates=True,index_col=0)
 df_tot_d= df_tot_m.diff()
-
-
 
 #### extract series
 df_ind = df_tot_d.reset_index(drop=True)
