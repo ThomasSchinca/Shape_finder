@@ -11,8 +11,7 @@ warnings.filterwarnings("ignore")
 import plotly.express as px
 from dash import Dash, html, Input, Output, State, callback_context,dcc
 import dash_bootstrap_components as dbc
-from dtaidistance import dtw
-from scipy.spatial import distance
+from dtaidistance import dtw,ed
 import bisect
 from dateutil.relativedelta import relativedelta
 
@@ -180,7 +179,7 @@ def find_most_close(seq1,win,metric='euclidean',loop=0):
                 seq2 = seq2 = (seq2 - seq2.min())/(seq2.max() - seq2.min())
                 try:
                     if metric=='euclidean':
-                        dist = distance.euclidean(seq1,seq2)
+                        dist = ed.distance(seq1,seq2)
                     elif metric=='dtw':
                         dist = dtw.distance(seq1,seq2)
                     tot.append([i,dist])
