@@ -6,19 +6,11 @@ Created on Tue Mar 14 22:20:06 2023
 """
 import pandas as pd 
 import numpy as np 
-import fiona
-import geopandas as gpd
 import warnings
 warnings.filterwarnings("ignore")
 import plotly.express as px
-import math
-from shapely.ops import cascaded_union
-import plotly.graph_objects as go
-import plotly.io as pio
-import webbrowser
 from dash import Dash, html, Input, Output, State, callback_context,dcc
 import dash_bootstrap_components as dbc
-import dash_cytoscape as cyto
 from dtaidistance import dtw
 from scipy.spatial import distance
 import bisect
@@ -280,10 +272,7 @@ def update_slide(value,slid):
 )
 def func(n_clicks,data):
     df = pd.read_json(data,orient="split")
-    print(df)
     return dcc.send_data_frame(df.to_csv, "Output.csv")
-
-webbrowser.open('http://127.0.0.1:8050/',new=2)
 
 if __name__ == '__main__':
     app.run_server(debug=True,use_reloader=False)
