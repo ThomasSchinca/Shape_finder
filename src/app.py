@@ -252,4 +252,4 @@ def func(n_clicks,data):
     return dcc.send_data_frame(df.to_csv, "Output.csv")
 
 if __name__ == '__main__':
-    app.run_server(debug=True,use_reloader=False)
+    app.run_server(debug=True)
