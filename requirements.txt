@@ -1,0 +1,14 @@
+dash==2.7.0
+dash_bootstrap_components==1.4.0
+dash_cytoscape==0.2.0
+dtaidistance==2.3.2
+Fiona==1.8.22
+geopandas==0.10.2
+numpy==1.22.3
+pandas==1.4.0
+plotly==5.11.0
+python_dateutil==2.8.2
+scipy==1.6.0
+Shapely==1.8.4
+gunicorn
+dash-tools
