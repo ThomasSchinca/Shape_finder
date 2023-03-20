@@ -82,6 +82,8 @@ app.layout = html.Div([
         dcc.Graph(id='plot')],style={'margin-left':200})
         ], style={'display': 'flex', 'flex-direction': 'row','marginTop':20,'marginBottom':50}),
     html.Div([
+        html.Div(['DTW window',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
+        dcc.RadioItems(['DTW','Euclidean'],'Euclidean',id='sel',inline=True,style={'margin-inline':'80px'}),
         html.Div(['Month window', dcc.Slider(6,12,1,value=6,id='slider')],style={'margin-inline':'80px','width':500}),
         html.Div([
             html.Button("Download CSV", id="btn_csv"),
@@ -105,6 +107,8 @@ app.layout = html.Div([
               Output('plot3', 'figure'),
               Output('plot4', 'figure'),
               Output('memory','data'),
+              Input('submit', 'value'),
+              Input('sel', 'value'),
               Input('slider', 'value'),
               Input('s1','value'),
               Input('s2','value'),
@@ -119,7 +123,7 @@ app.layout = html.Div([
               Input('s11','value'),
               Input('s12','value'))
 
-def update_elements(sli,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12):     
+def update_elements(submit,sel,sli,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12):     
     x=[]
     y=[]
     s_l = [s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12]
@@ -132,47 +136,93 @@ def update_elements(sli,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12):
     fig = px.line(x=df.index, y=df,title='Shape Wanted')
     fig.update_layout(xaxis_title='Number of Month',
                        yaxis_title='Normalized Fatalities',title_x=0.5)
-      
-    fig_2,fig_3,fig_4,memo = find_most_close(df,len(df),metric='euclidean') 
+    if  sel=='DTW':   
+        fig_2,fig_3,fig_4,memo = find_most_close(df,len(df),metric='dtw',loop=submit)
+    elif  sel=='Euclidean':   
+        fig_2,fig_3,fig_4,memo = find_most_close(df,len(df),metric='euclidean') 
     return fig,fig_2,fig_3,fig_4,memo.reset_index().to_json(orient="split")
 
 
-def find_most_close(seq1,win,metric='euclidean'):
-    
-    if seq1.var()!=0.0:
-        seq1 = (seq1 - seq1.min())/(seq1.max() - seq1.min())
-    seq1= np.array(seq1)
-    tot=[]
-    exclude,interv,n_test = int_exc(win)
-    for i in range(len(n_test)):
-        if i not in exclude:
-            seq2 = n_test[i:i+win]
-            seq2 = seq2 = (seq2 - seq2.min())/(seq2.max() - seq2.min())
-            try:
-                if metric=='euclidean':
-                    dist = ed.distance(seq1,seq2)
-                elif metric=='dtw':
-                    dist = dtw.distance(seq1,seq2)
-                tot.append([i,dist])
-            except:
-                1
-    tot=pd.DataFrame(tot)
-    tot = tot.sort_values([1])
-    figlist=[]
-    memo = pd.DataFrame(index=range(12))
-    for i in tot.iloc[:3,0].tolist():
-        col = seq[bisect.bisect_right(interv, i)-1].name
-        index_obs = seq[bisect.bisect_right(interv, i)-1].index[i-interv[bisect.bisect_right(interv, i)-1]]
-        index_obs_2 = index_obs + relativedelta(months=win)
-        obs = df_tot_m.loc[:index_obs_2,col].iloc[-win-1:-1]
-        memo=pd.concat([memo,pd.Series(obs.index).reset_index(drop=True)],axis=1)
-        memo=pd.concat([memo,pd.Series(obs).reset_index(drop=True)],axis=1)                 
-        fig_out = px.line(x=obs.index, y=obs,title=col,markers='o')
-        fig_out.update_layout(xaxis_title='Date',
-                       yaxis_title='Number of Fatalities',title_x=0.5)
-        figlist.append(fig_out)
-    figlist.append(memo)    
-    
+def find_most_close(seq1,win,metric='euclidean',loop=0):
+    if loop == 0:
+        if seq1.var()!=0.0:
+            seq1 = (seq1 - seq1.min())/(seq1.max() - seq1.min())
+        seq1= np.array(seq1)
+        tot=[]
+        exclude,interv,n_test = int_exc(win)
+        for i in range(len(n_test)):
+            if i not in exclude:
+                seq2 = n_test[i:i+win]
+                seq2 = seq2 = (seq2 - seq2.min())/(seq2.max() - seq2.min())
+                try:
+                    if metric=='euclidean':
+                        dist = ed.distance(seq1,seq2)
+                    elif metric=='dtw':
+                        dist = dtw.distance(seq1,seq2)
+                    tot.append([i,dist])
+                except:
+                    1
+        tot=pd.DataFrame(tot)
+        tot = tot.sort_values([1])
+        figlist=[]
+        memo = pd.DataFrame(index=range(12))
+        for i in tot.iloc[:3,0].tolist():
+            col = seq[bisect.bisect_right(interv, i)-1].name
+            index_obs = seq[bisect.bisect_right(interv, i)-1].index[i-interv[bisect.bisect_right(interv, i)-1]]
+            index_obs_2 = index_obs + relativedelta(months=win)
+            obs = df_tot_m.loc[:index_obs_2,col].iloc[-win-1:-1]
+            memo=pd.concat([memo,pd.Series(obs.index).reset_index(drop=True)],axis=1)
+            memo=pd.concat([memo,pd.Series(obs).reset_index(drop=True)],axis=1)                 
+            fig_out = px.line(x=obs.index, y=obs,title=col,markers='o')
+            fig_out.update_layout(xaxis_title='Date',
+                           yaxis_title='Number of Fatalities',title_x=0.5)
+            figlist.append(fig_out)
+        figlist.append(memo)    
+    else:
+        if seq1.var()!=0.0:
+            seq1 = (seq1 - seq1.min())/(seq1.max() - seq1.min())
+        seq1= np.array(seq1)
+        tot=[]
+        for lop in range(int(-loop),int(loop)+1):
+            exclude,interv,n_test = int_exc(win+lop)
+            for i in range(len(n_test)):
+                if i not in exclude:
+                    seq2 = n_test[i:i+int(win+lop)]
+                    seq2 = seq2 = (seq2 - seq2.min())/(seq2.max() - seq2.min())
+                    try:
+                        dist = dtw.distance(seq1,seq2)
+                        tot.append([i,dist,win+lop])
+                    except:
+                        1
+        tot=pd.DataFrame(tot)
+        tot = tot.sort_values([1])
+        figlist=[]
+        df_fig=[]
+        memo = pd.DataFrame(index=range(12))
+        c_lo=0
+        while len(figlist)<3:
+            i = tot.iloc[c_lo,0]
+            win = int(tot.iloc[c_lo,2])
+            exclude,interv,n_test = int_exc(win)
+            col = seq[bisect.bisect_right(interv, i)-1].name
+            index_obs = seq[bisect.bisect_right(interv, i)-1].index[i-interv[bisect.bisect_right(interv, i)-1]]
+            index_obs_2 = index_obs + relativedelta(months=win)
+            obs = df_tot_m.loc[:index_obs_2,col].iloc[-win-1:-1]
+            flag_ok=True
+            if c_lo!=0:
+                for ran in range(len(df_fig)):
+                    if (obs.index[int(win/2)].year == df_fig[ran][0]) and (col == df_fig[ran][1]):
+                        flag_ok=False
+            if flag_ok==True:        
+                fig_out = px.line(x=obs.index, y=obs,title=col,markers='o')
+                fig_out.update_layout(xaxis_title='Date',
+                               yaxis_title='Number of Fatalities',title_x=0.5)
+                figlist.append(fig_out)
+                df_fig.append([obs.index[int(win/2)].year,col])
+                memo=pd.concat([memo,pd.Series(obs.index).reset_index(drop=True)],axis=1)
+                memo=pd.concat([memo,pd.Series(obs).reset_index(drop=True)],axis=1)   
+            c_lo=c_lo+1
+        figlist.append(memo)   
     return figlist
 
 @app.callback(
@@ -202,3 +252,4 @@ def func(n_clicks,data):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
