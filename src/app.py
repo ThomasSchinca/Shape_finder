@@ -57,7 +57,7 @@ exclude,interv,n_test = int_exc()
 # =============================================================================
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
-#server = app.server
+server = app.server
 
 app.layout = html.Div([
     html.Div([dcc.Store(id='memory')]),
