@@ -14,6 +14,7 @@ import dash_bootstrap_components as dbc
 from dtaidistance import dtw,ed
 import bisect
 from dateutil.relativedelta import relativedelta
+import base64
 
 # =============================================================================
 # Dataset Fatalities
@@ -51,6 +52,11 @@ def int_exc(win=12):
 
 exclude,interv,n_test = int_exc()
 
+# Creation of the images 
+pace_png = base64.b64encode(open('PaCE_final_icon.png', 'rb').read()).decode('ascii')
+mail_png = base64.b64encode(open('Gmail_Logo_256px.png', 'rb').read()).decode('ascii')
+git_png = base64.b64encode(open('github-mark.png', 'rb').read()).decode('ascii')
+twitter_png = base64.b64encode(open('2021 Twitter logo - blue.png', 'rb').read()).decode('ascii')
 
 # =============================================================================
 # Visu 
@@ -60,8 +66,55 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 server = app.server
 
 app.layout = html.Div([
+    html.Div([
+    html.A([html.Img(src='data:image/png;base64,{}'.format(pace_png),style={
+            'position': 'absolute',
+            'right': '5px',
+            'top': '10px',
+            'display': 'block',
+            'height': '25px',
+            'width': '25px'
+        })], href='https://paceconflictlab.wixsite.com/conflict-research-la'),
+    html.A([html.Img(src='data:image/png;base64,{}'.format(mail_png),style={
+            'position': 'absolute',
+            'right': '45px',
+            'top': '10px',
+            'display': 'block',
+            'height': '25px',
+            'width': '25px'
+        })], href='mailto:schincat@tcd.ie'),    
+    html.A([html.Img(src='data:image/png;base64,{}'.format(git_png),style={
+            'position': 'absolute',
+            'right': '85px',
+            'top': '10px',
+            'display': 'block',
+            'height': '25px',
+            'width': '25px'
+        })], href='https://github.com/conflictlab'),
+    html.A([html.Img(src='data:image/png;base64,{}'.format(twitter_png),style={
+            'position': 'absolute',
+            'right': '125px',
+            'top': '10px',
+            'display': 'block',
+            'height': '25px',
+            'width': '25px'
+        })], href='https://twitter.com/LabConflict')
+    ]),
     html.Div([dcc.Store(id='memory')]),
     html.H1(children='Shape finder',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    html.Div([dcc.Markdown('''Shape Finder is a web application designed to assist users in finding patterns in monthly fatality datasets. 
+        The application allows users to input a shape of their choosing using adjustable sliders. Once the shape is created, 
+        the application will search the real dataset for the three closest matching patterns. The selected shapes are then 
+        printed with their relevant context, providing users with valuable insights into the patterns they\'ve identified. 
+        Users can also download these patterns for future reference or analysis. In addition, Shape Finder offers users the 
+        option to choose between Euclidean and DTW distance measures, with a 2-month flexibility. This allows users to tailor 
+        their searches to their specific needs, enabling them to find the most accurate and relevant results possible. Overall,
+        Shape Finder is a powerful and intuitive tool for anyone looking to gain insights into monthly fatality datasets. 
+        Its easy-to-use interface, flexible search options, and detailed outputs make it an ideal solution for researchers,
+        analysts, and anyone seeking to better understand patterns in this critical data.''',
+        style={'width': '100%','margin-left':'15px','margin-right':'15px'},
+    )]),
+    html.Hr(style={'width': '70%','margin':'auto'}),
     html.Div([
         html.Div(children=[
             html.Div(id='slider_l',children=[html.Div(['1',dcc.Slider(0, 1, marks=None, value=0.5,id='s1',vertical=True)],style={'height': '30%'}),
@@ -82,7 +135,7 @@ app.layout = html.Div([
         dcc.Graph(id='plot')],style={'margin-left':200})
         ], style={'display': 'flex', 'flex-direction': 'row','marginTop':20,'marginBottom':50}),
     html.Div([
-        html.Div(['DTW window',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
+        html.Div(['DTW flexibility',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
         dcc.RadioItems(['DTW','Euclidean'],'Euclidean',id='sel',inline=True,style={'margin-inline':'80px'}),
         html.Div(['Month window', dcc.Slider(6,12,1,value=6,id='slider')],style={'margin-inline':'80px','width':500}),
         html.Div([
@@ -91,6 +144,7 @@ app.layout = html.Div([
             ])
         ],
         style = {'display': 'flex','flex-direction': 'row','grid-auto-columns':'40%','width':'100%','marginTop':50,'marginBottom':20}),
+    html.Hr(style={'width': '70%','margin':'auto'}),
     html.Div([
         html.Div(children=[
             dcc.Graph(id='plot2')],style={'width': '35%'}),
@@ -100,6 +154,7 @@ app.layout = html.Div([
             dcc.Graph(id='plot4')],style={'width': '35%'})
         ],style={'display': 'flex', 'flex-direction': 'row','width': '99%'})
 ])
+
 
 
 @app.callback(Output('plot', 'figure'),
