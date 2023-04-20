@@ -138,6 +138,8 @@ app.layout = html.Div([
         html.Div(['DTW flexibility',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
         dcc.RadioItems(['DTW','Euclidean'],'Euclidean',id='sel',inline=True,style={'margin-inline':'80px'}),
         html.Div(['Month window', dcc.Slider(6,12,1,value=6,id='slider')],style={'margin-inline':'80px','width':500}),
+        html.Div(['Min distance',dcc.Input(id="dist_min", type="number", value=0.5,
+            min=0, max=10)]),
         html.Div([
             html.Button("Download CSV", id="btn_csv"),
             dcc.Download(id="download-dataframe-csv"),
@@ -152,7 +154,10 @@ app.layout = html.Div([
             dcc.Graph(id='plot3')],style={'width': '35%'}),
         html.Div(children=[
             dcc.Graph(id='plot4')],style={'width': '35%'})
-        ],style={'display': 'flex', 'flex-direction': 'row','width': '99%'})
+        ],style={'display': 'flex', 'flex-direction': 'row','width': '99%'}),
+    html.Hr(style={'width': '70%','margin':'auto'}),
+    html.Div([
+            dcc.Graph(id='plot5')])
 ])
 
 
@@ -161,6 +166,7 @@ app.layout = html.Div([
               Output('plot2', 'figure'),
               Output('plot3', 'figure'),
               Output('plot4', 'figure'),
+              Output('plot5', 'figure'),
               Output('memory','data'),
               Input('submit', 'value'),
               Input('sel', 'value'),
@@ -176,9 +182,10 @@ app.layout = html.Div([
               Input('s9','value'),
               Input('s10','value'),
               Input('s11','value'),
-              Input('s12','value'))
+              Input('s12','value'),
+              Input('dist_min','value'))
 
-def update_elements(submit,sel,sli,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12):     
+def update_elements(submit,sel,sli,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,m_d):     
     x=[]
     y=[]
     s_l = [s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12]
@@ -192,35 +199,47 @@ def update_elements(submit,sel,sli,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12):
     fig.update_layout(xaxis_title='Number of Month',
                        yaxis_title='Normalized Fatalities',title_x=0.5)
     if  sel=='DTW':   
-        fig_2,fig_3,fig_4,memo = find_most_close(df,len(df),metric='dtw',loop=submit)
+        fig_2,fig_3,fig_4,fig_5,memo = find_most_close(df,len(df),m_d,metric='dtw',loop=submit)
     elif  sel=='Euclidean':   
-        fig_2,fig_3,fig_4,memo = find_most_close(df,len(df),metric='euclidean') 
-    return fig,fig_2,fig_3,fig_4,memo.reset_index().to_json(orient="split")
+        fig_2,fig_3,fig_4,fig_5,memo = find_most_close(df,len(df),m_d,metric='euclidean') 
+    return fig,fig_2,fig_3,fig_4,fig_5,memo.reset_index().to_json(orient="split")
 
 
-def find_most_close(seq1,win,metric='euclidean',loop=0):
+def find_most_close(seq1,win,min_d,metric='euclidean',loop=0):
     if loop == 0:
         if seq1.var()!=0.0:
             seq1 = (seq1 - seq1.min())/(seq1.max() - seq1.min())
         seq1= np.array(seq1)
         tot=[]
+        tot_seq=[]
         exclude,interv,n_test = int_exc(win)
         for i in range(len(n_test)):
             if i not in exclude:
                 seq2 = n_test[i:i+win]
-                seq2 = seq2 = (seq2 - seq2.min())/(seq2.max() - seq2.min())
+                seq2 = (seq2 - seq2.min())/(seq2.max() - seq2.min())
                 try:
                     if metric=='euclidean':
                         dist = ed.distance(seq1,seq2)
                     elif metric=='dtw':
                         dist = dtw.distance(seq1,seq2)
                     tot.append([i,dist])
+                    if (i+6 not in exclude) & (i<len(n_test)-win-6):
+                        seq2 = n_test[i:i+win]
+                        seq3 = n_test[i+win:i+win+6]
+                        seq3 = (seq3 - seq2.min())/(seq2.max() - seq2.min())
+                        tot_seq.append(seq3.tolist())
+                    else:
+                        tot_seq.append([float('NaN')]*6)
                 except:
                     1
+
+        tot_seq=pd.DataFrame(tot_seq,columns=[2,3,4,5,6,7])        
         tot=pd.DataFrame(tot)
+        tot = pd.concat([tot,tot_seq],axis=1)
         tot = tot.sort_values([1])
         figlist=[]
         memo = pd.DataFrame(index=range(12))
+        c=0
         for i in tot.iloc[:3,0].tolist():
             col = seq[bisect.bisect_right(interv, i)-1].name
             index_obs = seq[bisect.bisect_right(interv, i)-1].index[i-interv[bisect.bisect_right(interv, i)-1]]
@@ -228,9 +247,33 @@ def find_most_close(seq1,win,metric='euclidean',loop=0):
             obs = df_tot_m.loc[:index_obs_2,col].iloc[-win-1:-1]
             memo=pd.concat([memo,pd.Series(obs.index).reset_index(drop=True)],axis=1)
             memo=pd.concat([memo,pd.Series(obs).reset_index(drop=True)],axis=1)                 
-            fig_out = px.line(x=obs.index, y=obs,title=col,markers='o')
+            fig_out = px.line(x=obs.index, y=obs,title=col+" <br><sup> d = "+str(tot.iloc[c,1])+"</sup>",markers='o')
             fig_out.update_layout(xaxis_title='Date',
                            yaxis_title='Number of Fatalities',title_x=0.5)
+            figlist.append(fig_out)
+            c=c+1
+        tot = tot[tot[1]<min_d] 
+        if len(tot)>0:
+            mean_f = tot.iloc[:,2:].mean()
+            std_f = (1.96*tot.iloc[:,2:].std())/np.sqrt(len(tot))
+            std_f = std_f.fillna(0) # if only one obs
+            x_c = range(len(seq1)+len(mean_f))
+            y_c = pd.concat([pd.Series(seq1),mean_f])
+            fig_out = px.line(x=x_c, y=y_c,title="Predicted fatalities dynamic",markers='o')
+            fig_out.update_layout(xaxis_title='Months',
+                           yaxis_title='Normalized Fatalities',title_x=0.5)
+            fig_out.add_scatter(x =pd.Series(range(len(seq1),len(seq1)+len(mean_f))), y = mean_f+std_f,
+                           mode = 'lines',showlegend=True,opacity=0.2,name='Confidence Interval 95%').update_traces(marker=dict(color='red'))
+            fig_out.add_scatter(x =pd.Series(range(len(seq1),len(seq1)+len(mean_f))), y = mean_f-std_f,
+                           mode = 'lines',showlegend=False,opacity=0.2).update_traces(marker=dict(color='red'))
+            fig_out.add_scatter(x =pd.Series(range(len(seq1),len(seq1)+len(mean_f))), y = mean_f,
+                           mode = 'lines+markers',showlegend=False).update_traces(marker=dict(color='red'))
+            figlist.append(fig_out)
+        else : 
+            x_c = range(len(seq1))
+            y_c = pd.Series(seq1)
+            fig_out = px.line(x=x_c, y=y_c,title="Predicted fatalities dynamic",markers='o')
+            fig_out.add_annotation(x=(len(seq1)-1)/2, y=0.65,text="No patterns found",showarrow=False)
             figlist.append(fig_out)
         figlist.append(memo)    
     else:
@@ -238,6 +281,7 @@ def find_most_close(seq1,win,metric='euclidean',loop=0):
             seq1 = (seq1 - seq1.min())/(seq1.max() - seq1.min())
         seq1= np.array(seq1)
         tot=[]
+        tot_seq=[]
         for lop in range(int(-loop),int(loop)+1):
             exclude,interv,n_test = int_exc(win+lop)
             for i in range(len(n_test)):
@@ -247,9 +291,18 @@ def find_most_close(seq1,win,metric='euclidean',loop=0):
                     try:
                         dist = dtw.distance(seq1,seq2)
                         tot.append([i,dist,win+lop])
+                        if (i+6 not in exclude) & (i<len(n_test)-win-6):
+                            seq2 = n_test[i:i+win]
+                            seq3 = n_test[i+win:i+win+6]
+                            seq3 = (seq3 - seq2.min())/(seq2.max() - seq2.min())
+                            tot_seq.append(seq3.tolist())
+                        else:
+                            tot_seq.append([float('NaN')]*6)
                     except:
                         1
+        tot_seq=pd.DataFrame(tot_seq,columns=[3,4,5,6,7,8])        
         tot=pd.DataFrame(tot)
+        tot = pd.concat([tot,tot_seq],axis=1)
         tot = tot.sort_values([1])
         figlist=[]
         df_fig=[]
@@ -269,7 +322,7 @@ def find_most_close(seq1,win,metric='euclidean',loop=0):
                     if (obs.index[int(win/2)].year == df_fig[ran][0]) and (col == df_fig[ran][1]):
                         flag_ok=False
             if flag_ok==True:        
-                fig_out = px.line(x=obs.index, y=obs,title=col,markers='o')
+                fig_out = px.line(x=obs.index, y=obs,title=col+" <br><sup> d = "+str(tot.iloc[c_lo,1])+"</sup>",markers='o')
                 fig_out.update_layout(xaxis_title='Date',
                                yaxis_title='Number of Fatalities',title_x=0.5)
                 figlist.append(fig_out)
@@ -277,6 +330,29 @@ def find_most_close(seq1,win,metric='euclidean',loop=0):
                 memo=pd.concat([memo,pd.Series(obs.index).reset_index(drop=True)],axis=1)
                 memo=pd.concat([memo,pd.Series(obs).reset_index(drop=True)],axis=1)   
             c_lo=c_lo+1
+        tot = tot[tot[1]<min_d] 
+        if len(tot)>0:
+            mean_f = tot.iloc[:,3:].mean()
+            std_f = (1.96*tot.iloc[:,3:].std())/np.sqrt(len(tot))
+            std_f = std_f.fillna(0) # if only one obs
+            x_c = range(len(seq1)+len(mean_f))
+            y_c = pd.concat([pd.Series(seq1),mean_f])
+            fig_out = px.line(x=x_c, y=y_c,title="Predicted fatalities dynamic",markers='o')
+            fig_out.update_layout(xaxis_title='Months',
+                           yaxis_title='Normalized Fatalities',title_x=0.5)
+            fig_out.add_scatter(x =pd.Series(range(len(seq1),len(seq1)+len(mean_f))), y = mean_f+std_f,
+                           mode = 'lines',showlegend=True,opacity=0.2,name='Confidence Interval 95%').update_traces(marker=dict(color='red'))
+            fig_out.add_scatter(x =pd.Series(range(len(seq1),len(seq1)+len(mean_f))), y = mean_f-std_f,
+                           mode = 'lines',showlegend=False,opacity=0.2).update_traces(marker=dict(color='red'))
+            fig_out.add_scatter(x =pd.Series(range(len(seq1),len(seq1)+len(mean_f))), y = mean_f,
+                           mode = 'lines+markers',showlegend=False).update_traces(marker=dict(color='red'))
+            figlist.append(fig_out)
+        else : 
+            x_c = range(len(seq1))
+            y_c = pd.Series(seq1)
+            fig_out = px.line(x=x_c, y=y_c,title="Predicted fatalities dynamic",markers='o')
+            fig_out.add_annotation(x=(len(seq1)-1)/2, y=0.65,text="No patterns found",showarrow=False)
+            figlist.append(fig_out)      
         figlist.append(memo)   
     return figlist
 
