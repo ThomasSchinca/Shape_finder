@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'ShapeFinder'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D0A6B7829348484996656F40A13A575B }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_15FCDFB301754B29A4875C5714F45B3E }}
