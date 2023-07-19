@@ -9,6 +9,6 @@ plotly==5.11.0
 python_dateutil==2.8.2
 setuptools==65.5.1
 Shapely==1.8.4
-dtaidistance==2.3.4
+dtaidistance==2.3.1
 gunicorn
 dash-tools
