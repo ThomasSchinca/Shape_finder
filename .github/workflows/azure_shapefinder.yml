@@ -9,16 +9,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
     steps:
-      - uses: actions/checkout@v2
-        runs-on: node16
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up Python version
         uses: actions/setup-python@v1
         with:
           python-version: '3.8'
-        runs-on: node16
 
       - name: Create and start virtual environment
         run: |
