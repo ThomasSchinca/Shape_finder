@@ -64,7 +64,7 @@ app.layout = html.Div([
         })], href='https://twitter.com/LabConflict')
     ]),
     html.H1(children='Shape finder',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
-    html.Div([dcc.Markdown('''Shape Finder uncovers patterns in monthly conflict fatality datasets. 
+    html.Div([dcc.Markdown('''Shape Finder uncovers patterns in time series datasets. 
                            You choose a shape using adjustable sliders, and Shape Finder searches 
                            the real dataset for the closest matching patterns. The three closest 
                            shapes are plotted for illustration, and a prediction of the future 6 months.
@@ -75,7 +75,7 @@ app.layout = html.Div([
     html.Hr(style={'width': '70%','margin':'auto'}),
     html.H5(children='Upload your data',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
     html.Div([dcc.Markdown('''Please provide your dataset following the format of the exemple datasets, you can
-                           found them in Github. Once you uploaded it, a little vizualization of 
+                           found them in [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset), or just use one of them. Once you uploaded it, a vizualization of 
                            the first 10 rows and 5 columns present in the input data frame is displayed.''',
         style={'width': '80%','margin':'auto','text-align': 'justify'})]),
     dcc.Upload(
