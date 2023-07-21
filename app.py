@@ -21,6 +21,8 @@ import bisect
 external_stylesheets=[dbc.themes.LUX]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.title = 'ShapeFinder'
+app._favicon = ("icone_pace.ico")
 server = app.server
 
 pace_png = base64.b64encode(open('PaCE_final_icon.png', 'rb').read()).decode('ascii')
