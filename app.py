@@ -76,7 +76,7 @@ app.layout = html.Div([
     html.H5(children='Upload your data',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
     html.Div([dcc.Markdown('''Please provide your dataset following the format of the exemple datasets, you can
                            found them in [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset), or just use one of them. Once you uploaded it, a vizualization of 
-                           the first 10 rows and 5 columns present in the input data frame is displayed.''',
+                           the first 10 rows and 5 columns present in the input data frame is displayed.''',dangerously_allow_html=True,
         style={'width': '80%','margin':'auto','text-align': 'justify'})]),
     dcc.Upload(
         id='upload-data',
