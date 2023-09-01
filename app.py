@@ -92,7 +92,7 @@ app.layout = html.Div([
                            * DTW / Euclidean : Selection of the distance metric 
                            * DTW Flexibility : Window flexibilty to look for patterns (-/+ flexibility). For example, when 
                            the window is 7 and flexibility is 1, the ShapeFinder is going to search in window 6,7 and 8. Only for DTW.
-                           * length of sequence : Window of the shape wanted. 
+                           * Length of sequence : Window of the shape wanted. 
                            * Max distance : The maximal distance to allow the sequence found to be included in the matching ones. 
                            Only sequences with lower (or equal) distance are considered. 
                            ''',
@@ -119,7 +119,7 @@ app.layout = html.Div([
     html.Div([
     dcc.RadioItems(['DTW','Euclidean'],'Euclidean',id='sel',style={'margin-inline':'80px'}),
     html.Div(['DTW flexibility',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
-    html.Div(['Month window', dcc.Slider(6,12,1,value=6,id='slider')],style={'margin-inline':'80px','width':500}),
+    html.Div(['Length of sequence', dcc.Slider(6,12,1,value=6,id='slider')],style={'margin-inline':'80px','width':500}),
     html.Div(['Max distance',dcc.Input(id="dist_min", type="number", value=0.5,
         min=0, max=3,step=0.1)]),
     ],
@@ -215,7 +215,7 @@ def wanted_shape(s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,sli):
     df = df.sort_index()
     df.index = range(1,len(df)+1)
     fig = px.line(x=df.index, y=df,title='Shape Wanted')
-    fig.update_layout(xaxis_title='Number of Month',
+    fig.update_layout(xaxis_title='Number of time points',
                        yaxis_title='Normalized Units',title_x=0.5)
     return fig
 
