@@ -65,20 +65,16 @@ app.layout = html.Div([
             'width': '25px'
         })], href='https://twitter.com/LabConflict')
     ]),
-    html.H1(children='Shape finder',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
-    html.Div([dcc.Markdown('''Shape Finder uncovers patterns in time series datasets. 
-                           You choose a shape using adjustable sliders, and Shape Finder searches 
-                           the real dataset for the closest matching patterns. The three closest 
-                           shapes are plotted for illustration, and a prediction of the future 6 months.
-                           Finally, you can also download a CSV file of all relevant shapes and their 
-                           associated similarity score.''',
+    html.H1(children='Time Series Shape Finder',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    html.Div([dcc.Markdown('''Shape Finder is a platform to identify and predict patterns in time series datasets. It lets you search for specific shapes within complex datasets. Through the use of adjustable sliders, you can define the shape you are interested in—be it a sharp peak, a gradual incline, or any other distinctive form. Once defined, Shape Finder sifts through your dataset to find the closest matching patterns.
+	For added clarity and visualization, the application plots the three most similar shapes, allowing you to gauge the accuracy and relevance of the matches. Beyond mere identification, Shape Finder also predicts how these patterns might evolve over the next six periods.
+	Finally, you can download a CSV file which includes all identified shapes and their associated similarity scores.''',
         style={'width': '100%','margin-left':'15px','margin-right':'15px'},
     )]),
     html.Hr(style={'width': '70%','margin':'auto'}),
-    html.H5(children='Upload your data',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
-    html.Div([dcc.Markdown('''Please provide your dataset following the format of the exemple datasets, you can
-                           found them in [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset), or just use one of them. Once you uploaded it, a vizualization of 
-                           the first 10 rows and 5 columns present in the input data frame is displayed.''',dangerously_allow_html=True,
+    html.H5(children='STEP 1: UPLOAD YOUR OWN DATA',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    html.Div([dcc.Markdown('''Please follow the format of the example datasets on [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset). Once you uploaded it, a vizualization of 
+                           the first 10 rows and 5 columns will be displayed.''',dangerously_allow_html=True,
         style={'width': '80%','margin':'auto','text-align': 'justify'})]),
     dcc.Upload(
         id='upload-data',
@@ -91,13 +87,14 @@ app.layout = html.Div([
     dcc.Store(id='store'),
     html.Div(id='output-data-upload'),
     html.Hr(style={'width': '70%','margin':'auto'}),
-    html.H5(children='Select the shape and parameters',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    html.H5(children='STEP 2: SELECT THE SHAPE AND PARAMETERS',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
     html.Div([dcc.Markdown(''' 
-                           * DTW Flexibility : Window flexibilty to look for patterns (-/+ flexibility). For exemple, when 
-                           the window is 7 and flexibility is 1, the ShapeFinder is going to search in window 6,7 and 8. Only for DTW.
                            * DTW / Euclidean : Selection of the distance metric 
-                           * Month window : Window of the shape wanted. 
-                           * Max distance : The maximal distance to allow the pattern found to be included in the matching patterns
+                           * DTW Flexibility : Window flexibilty to look for patterns (-/+ flexibility). For example, when 
+                           the window is 7 and flexibility is 1, the ShapeFinder is going to search in window 6,7 and 8. Only for DTW.
+                           * length of sequence : Window of the shape wanted. 
+                           * Max distance : The maximal distance to allow the sequence found to be included in the matching ones. 
+                           Only sequences with lower (or equal) distance are considered. 
                            ''',
     style={'width': '80%','margin':'auto','text-align': 'justify'})]),
     html.Div([
@@ -120,8 +117,8 @@ app.layout = html.Div([
     dcc.Graph(id='plot')],style={'margin-left':200})
     ], style={'display': 'flex', 'flex-direction': 'row','marginTop':20,'marginBottom':0}),
     html.Div([
-    html.Div(['DTW flexibility',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
     dcc.RadioItems(['DTW','Euclidean'],'Euclidean',id='sel',style={'margin-inline':'80px'}),
+    html.Div(['DTW flexibility',dcc.Slider(0, 2, 1,value=0, id='submit')],style={'width': '10%','margin-inline':'80px'}),
     html.Div(['Month window', dcc.Slider(6,12,1,value=6,id='slider')],style={'margin-inline':'80px','width':500}),
     html.Div(['Max distance',dcc.Input(id="dist_min", type="number", value=0.5,
         min=0, max=3,step=0.1)]),
@@ -142,9 +139,7 @@ app.layout = html.Div([
         ],style={'display': 'flex', 'flex-direction': 'row','width': '99%'}),
     html.Hr(style={'width': '70%','margin':'auto'}),
     html.H5(children='Forecast',style = {'textAlign': 'center','marginBottom':40,'marginTop':40}),
-    html.Div([dcc.Markdown('''The forecasting value are calculated using the mean value of the following 
-                           values of the matching past patterns. The selected patterns are the ones that 
-                           have lower distance then the threshold given by the user. ''',
+    html.Div([dcc.Markdown('''The forecasted values are generated by averaging the subsequent data points from the past patterns that closely match your selected shape.''',
     style={'width': '80%','margin':'auto','text-align': 'justify'})]),
     html.Div([
             dcc.Graph(id='plot5')]),
