@@ -93,6 +93,7 @@ app.layout = html.Div([
         ]),
         style={'width': '50%','height': '60px','lineHeight': '60px','borderWidth': '1px','borderStyle': 'dashed',
             'borderRadius': '5px','textAlign': 'center','margin':'auto','marginBottom':20}),
+    html.Div(id='file_name',style={'textAlign': 'center'}),
     dcc.Store(id='store'),
     html.Div(id='output-data-upload'),
     html.Hr(style={'width': '70%','margin':'auto'}),
@@ -164,6 +165,7 @@ app.layout = html.Div([
 ])
              
 @app.callback(Output('store', 'data'),
+              Output('file_name','children'),
               Input('conf', 'n_clicks'),
               Input('inf', 'n_clicks'),
               Input('temp', 'n_clicks'),
@@ -177,17 +179,21 @@ def display(btn1, btn2, btn3,contents, list_of_names, list_of_dates):
     button_id = ctx.triggered_id 
     if button_id == 'conf':
         df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Conflict-fatalities.csv?raw=True',parse_dates=True)
+        name=html.H5(children='Conflict-Fatalities Dataset')
     elif button_id == 'inf':
         df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Inflation.csv?raw=True',parse_dates=True)
+        name=html.H5(children='Inflation Dataset')
     elif button_id == 'temp':
         df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Temperatures.csv?raw=True',parse_dates=True)
+        name=html.H5(children='Temperature Dataset')
     else :
         if contents is None:
             raise PreventUpdate
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-    return df.to_json(date_format='iso', orient='split') 
+        name=html.H5(children=list_of_names)
+    return df.to_json(date_format='iso', orient='split'),name 
 
 
 @app.callback(
