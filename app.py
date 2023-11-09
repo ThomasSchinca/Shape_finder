@@ -74,7 +74,7 @@ app.layout = html.Div([
     html.Hr(style={'width': '70%','margin':'auto'}),
     html.H5(children='STEP 1: SELECT THE DATASET',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
     html.Div([dcc.Markdown('''
-                           * Conflict-Fatalities : Monthly conflict fatalities from Ukraine, Sudan, and Ethiopia, extracted from the UCDP Dataset (source: https://ucdp.uu.se/downloads/). (selected by default)
+                           * Conflict-Fatalities : Monthly conflict fatalities from Ukraine, Sudan, and Ethiopia, extracted from the UCDP Dataset (source: https://ucdp.uu.se/downloads/).
                            * Inflation.csv: Monthly inflation at the country level (source: https://www.worldbank.org/en/research/brief/inflation-database).
                            * Temperatures.csv: Monthly mean temperatures at the country level, extracted from ERA-5 satellite data (source: https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form).
                            '''
@@ -165,7 +165,7 @@ app.layout = html.Div([
              
 @app.callback(Output('store', 'data', allow_duplicate=True),
               Input('conf', 'n_clicks'),
-              prevent_initial_call='True')
+              prevent_initial_call=True)
 
 def update_output_1(n_clicks):
     df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Conflict-fatalities.csv?raw=True',parse_dates=True)
@@ -173,7 +173,7 @@ def update_output_1(n_clicks):
 
 @app.callback(Output('store', 'data', allow_duplicate=True),
               Input('inf', 'n_clicks'),
-              prevent_initial_call='True')
+              prevent_initial_call=True)
 
 def update_output_2(n_clicks):
     df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Inflation.csv?raw=True',parse_dates=True)
@@ -181,7 +181,7 @@ def update_output_2(n_clicks):
 
 @app.callback(Output('store', 'data', allow_duplicate=True),
               Input('temp', 'n_clicks'),
-              prevent_initial_call='True')
+              prevent_initial_call=True)
 
 def update_output_3(n_clicks):
     df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Temperatures.csv?raw=True',parse_dates=True)
