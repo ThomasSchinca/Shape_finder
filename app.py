@@ -10,7 +10,7 @@ import io
 import numpy as np
 import dash
 from dash.dependencies import Input, Output, State
-from dash import dcc, html, dash_table
+from dash import dcc, html, dash_table,ctx
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -72,15 +72,15 @@ app.layout = html.Div([
         style={'width': '100%','margin-left':'15px','margin-right':'15px'},
     )]),
     html.Hr(style={'width': '70%','margin':'auto'}),
-    html.H5(children='STEP 1: SELECT THE DATASET',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
-    html.Div([dcc.Markdown('''
-                           * Conflict-Fatalities : Monthly conflict fatalities from Ukraine, Sudan, and Ethiopia, extracted from the UCDP Dataset (source: https://ucdp.uu.se/downloads/).
-                           * Inflation.csv: Monthly inflation at the country level (source: https://www.worldbank.org/en/research/brief/inflation-database).
-                           * Temperatures.csv: Monthly mean temperatures at the country level, extracted from ERA-5 satellite data (source: https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form).
-                           '''
-        ,dangerously_allow_html=True,
-        style={'width': '80%','margin':'auto','text-align': 'justify'})]),
-    html.Div([html.Div([html.Button('Conflict-Fatalities', id='conf', n_clicks=0)],style={'margin-left':'425px','height': '60px'}),html.Div([html.Button('Inflation', id='inf', n_clicks=0)],style={'margin-left':'100px','height': '60px'}),html.Div([html.Button('Temperature', id='temp', n_clicks=0)],style={'margin-left':'100px','height': '60px'})],style={'display': 'flex','flex-direction':'row','marginBottom':30}),
+    # html.H5(children='STEP 1: SELECT THE DATASET',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    # html.Div([dcc.Markdown('''
+    #                        * Conflict-Fatalities : Monthly conflict fatalities from Ukraine, Sudan, and Ethiopia, extracted from the UCDP Dataset (source: https://ucdp.uu.se/downloads/).
+    #                        * Inflation.csv: Monthly inflation at the country level (source: https://www.worldbank.org/en/research/brief/inflation-database).
+    #                        * Temperatures.csv: Monthly mean temperatures at the country level, extracted from ERA-5 satellite data (source: https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form).
+    #                        '''
+    #     ,dangerously_allow_html=True,
+    #     style={'width': '80%','margin':'auto','text-align': 'justify'})]),
+    # html.Div([html.Div([html.Button('Conflict-Fatalities', id='conf', n_clicks=0)],style={'margin-left':'425px','height': '60px'}),html.Div([html.Button('Inflation', id='inf', n_clicks=0)],style={'margin-left':'100px','height': '60px'}),html.Div([html.Button('Temperature', id='temp', n_clicks=0)],style={'margin-left':'100px','height': '60px'})],style={'display': 'flex','flex-direction':'row','marginBottom':30}),
     html.H5(children='OR : UPLOAD YOUR OWN DATA',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
     html.Div([dcc.Markdown('''Please follow the format of the example datasets on [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset). Once you uploaded it or select one, a vizualization of 
                            the first 10 rows and 5 columns will be displayed.''',dangerously_allow_html=True,
@@ -163,29 +163,20 @@ app.layout = html.Div([
     html.Div(id='output-data-csv')
 ])
              
-@app.callback(Output('store', 'data', allow_duplicate=True),
-              Input('conf', 'n_clicks'),
-              prevent_initial_call=True)
-
-def update_output_1(n_clicks):
-    df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Conflict-fatalities.csv?raw=True',parse_dates=True)
-    return df.to_json(date_format='iso', orient='split')  
-
-@app.callback(Output('store', 'data', allow_duplicate=True),
-              Input('inf', 'n_clicks'),
-              prevent_initial_call=True)
-
-def update_output_2(n_clicks):
-    df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Inflation.csv?raw=True',parse_dates=True)
-    return df.to_json(date_format='iso', orient='split') 
-
-@app.callback(Output('store', 'data', allow_duplicate=True),
-              Input('temp', 'n_clicks'),
-              prevent_initial_call=True)
-
-def update_output_3(n_clicks):
-    df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Temperatures.csv?raw=True',parse_dates=True)
-    return df.to_json(date_format='iso', orient='split') 
+# @app.callback(Output('store', 'data'),
+#               Input('conf', 'n_clicks'),
+#               Input('inf', 'n_clicks'),
+#               Input('temp', 'n_clicks'),
+#               prevent_initial_call=True)
+# def display(btn1, btn2, btn3):
+#     button_id = ctx.triggered_id 
+#     if button_id == 'conf':
+#         df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Conflict-fatalities.csv?raw=True',parse_dates=True)
+#     elif button_id == 'inf':
+#         df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Inflation.csv?raw=True',parse_dates=True)
+#     elif button_id == 'temp':
+#         df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Temperatures.csv?raw=True',parse_dates=True)
+#     return df.to_json(date_format='iso', orient='split') 
 
 
 
