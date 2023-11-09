@@ -167,7 +167,7 @@ app.layout = html.Div([
               Input('conf', 'n_clicks'),
               prevent_initial_call='True')
 
-def update_output(n_clicks):
+def update_output_1(n_clicks):
     df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Conflict-fatalities.csv?raw=True',parse_dates=True)
     return df.to_json(date_format='iso', orient='split')  
 
@@ -175,7 +175,7 @@ def update_output(n_clicks):
               Input('inf', 'n_clicks'),
               prevent_initial_call='True')
 
-def update_output(n_clicks):
+def update_output_2(n_clicks):
     df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Inflation.csv?raw=True',parse_dates=True)
     return df.to_json(date_format='iso', orient='split') 
 
@@ -183,9 +183,11 @@ def update_output(n_clicks):
               Input('temp', 'n_clicks'),
               prevent_initial_call='True')
 
-def update_output(n_clicks):
+def update_output_3(n_clicks):
     df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Temperatures.csv?raw=True',parse_dates=True)
     return df.to_json(date_format='iso', orient='split') 
+
+
 
 @app.callback(Output('store', 'data'),
               Input('upload-data', 'contents'),
