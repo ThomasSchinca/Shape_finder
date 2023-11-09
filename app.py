@@ -72,8 +72,17 @@ app.layout = html.Div([
         style={'width': '100%','margin-left':'15px','margin-right':'15px'},
     )]),
     html.Hr(style={'width': '70%','margin':'auto'}),
-    html.H5(children='STEP 1: UPLOAD YOUR OWN DATA',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
-    html.Div([dcc.Markdown('''Please follow the format of the example datasets on [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset). Once you uploaded it, a vizualization of 
+    html.H5(children='STEP 1: SELECT THE DATASET',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    html.Div([dcc.Markdown('''
+                           * Conflict-Fatalities : Monthly conflict fatalities from Ukraine, Sudan, and Ethiopia, extracted from the UCDP Dataset (source: https://ucdp.uu.se/downloads/). (selected by default)
+                           * Inflation.csv: Monthly inflation at the country level (source: https://www.worldbank.org/en/research/brief/inflation-database).
+                           * Temperatures.csv: Monthly mean temperatures at the country level, extracted from ERA-5 satellite data (source: https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form).
+                           '''
+        ,dangerously_allow_html=True,
+        style={'width': '80%','margin':'auto','text-align': 'justify'})]),
+    html.Div([html.Div([html.Button('Conflict-Fatalities', id='conf', n_clicks=0)],style={'margin-left':'425px','height': '60px'}),html.Div([html.Button('Inflation', id='inf', n_clicks=0)],style={'margin-left':'100px','height': '60px'}),html.Div([html.Button('Temperature', id='temp', n_clicks=0)],style={'margin-left':'100px','height': '60px'})],style={'display': 'flex','flex-direction':'row','marginBottom':30}),
+    html.H5(children='OR : UPLOAD YOUR OWN DATA',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+    html.Div([dcc.Markdown('''Please follow the format of the example datasets on [Github](https://github.com/ThomasSchinca/Shape_Finder_dataset). Once you uploaded it or select one, a vizualization of 
                            the first 10 rows and 5 columns will be displayed.''',dangerously_allow_html=True,
         style={'width': '80%','margin':'auto','text-align': 'justify'})]),
     dcc.Upload(
@@ -153,12 +162,36 @@ app.layout = html.Div([
              'margin':'auto','marginBottom':20}),
     html.Div(id='output-data-csv')
 ])
+             
+@app.callback(Output('store', 'data', allow_duplicate=True),
+              Input('conf', 'n_clicks'),
+              prevent_initial_call='True')
 
+def update_output(n_clicks):
+    df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Conflict-fatalities.csv?raw=True',parse_dates=True)
+    return df.to_json(date_format='iso', orient='split')  
+
+@app.callback(Output('store', 'data', allow_duplicate=True),
+              Input('inf', 'n_clicks'),
+              prevent_initial_call='True')
+
+def update_output(n_clicks):
+    df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Inflation.csv?raw=True',parse_dates=True)
+    return df.to_json(date_format='iso', orient='split') 
+
+@app.callback(Output('store', 'data', allow_duplicate=True),
+              Input('temp', 'n_clicks'),
+              prevent_initial_call='True')
+
+def update_output(n_clicks):
+    df = pd.read_csv('https://github.com/ThomasSchinca/Shape_Finder_dataset/blob/main/Temperatures.csv?raw=True',parse_dates=True)
+    return df.to_json(date_format='iso', orient='split') 
 
 @app.callback(Output('store', 'data'),
               Input('upload-data', 'contents'),
               State('upload-data', 'filename'),
-              State('upload-data', 'last_modified'))
+              State('upload-data', 'last_modified')
+              )
 
 def update_output(contents, list_of_names, list_of_dates):
     if contents is None:
