@@ -28,44 +28,45 @@ server = app.server
 pace_png = base64.b64encode(open('PaCE_final_icon.png', 'rb').read()).decode('ascii')
 mail_png = base64.b64encode(open('Gmail_Logo_256px.png', 'rb').read()).decode('ascii')
 git_png = base64.b64encode(open('github-mark.png', 'rb').read()).decode('ascii')
-twitter_png = base64.b64encode(open('2021 Twitter logo - blue.png', 'rb').read()).decode('ascii')
+twitter_png = base64.b64encode(open('x_logo.png', 'rb').read()).decode('ascii')
 
 app.layout = html.Div([
     html.Div([
-    html.A([html.Img(src='data:image/png;base64,{}'.format(pace_png),style={
-            'position': 'absolute',
-            'right': '5px',
-            'top': '10px',
-            'display': 'block',
-            'height': '25px',
-            'width': '25px'
-        })], href='https://paceconflictlab.wixsite.com/conflict-research-la'),
-    html.A([html.Img(src='data:image/png;base64,{}'.format(mail_png),style={
-            'position': 'absolute',
-            'right': '45px',
-            'top': '10px',
-            'display': 'block',
-            'height': '25px',
-            'width': '25px'
-        })], href='mailto:schincat@tcd.ie'),    
-    html.A([html.Img(src='data:image/png;base64,{}'.format(git_png),style={
-            'position': 'absolute',
-            'right': '85px',
-            'top': '10px',
-            'display': 'block',
-            'height': '25px',
-            'width': '25px'
-        })], href='https://github.com/conflictlab'),
-    html.A([html.Img(src='data:image/png;base64,{}'.format(twitter_png),style={
-            'position': 'absolute',
-            'right': '125px',
-            'top': '10px',
-            'display': 'block',
-            'height': '25px',
-            'width': '25px'
-        })], href='https://twitter.com/LabConflict')
-    ]),
-    html.H1(children='Time Series Shape Finder',style = {'textAlign': 'center','marginBottom':40,'marginTop':20}),
+       html.H2("Time Series ShapeFinder",style={'textAlign': 'left', 'margin': '0', 'padding': '0'}),  # Title
+       html.A([html.H4("Our Work", style={'textAlign': 'left', 'color': '#555', 'fontSize': '16px','marginTop':10,'marginLeft':50})],
+              href="https://shapefinderlive.azurewebsites.net/",
+               style={'color': '#555', 'fontSize': '14px','textDecoration': 'none'}),
+       html.A([html.H4("The Team", style={'textAlign': 'left', 'color': '#555', 'fontSize': '16px','marginTop':10,'marginLeft':50})],
+              href="https://paceconflictlab.wixsite.com/conflict-research-la/team-4",
+               style={'color': '#555', 'fontSize': '14px','textDecoration': 'none'}),
+       html.A([html.H4("Contact", style={'textAlign': 'left', 'color': '#555', 'fontSize': '16px','marginTop':10,'marginLeft':395})],
+              href="mailto:schincat@tcd.ie",
+               style={'color': '#555', 'fontSize': '14px','textDecoration': 'none'}),
+       html.A([html.Img(src='data:image/png;base64,{}'.format(pace_png),style={
+               'position': 'absolute',
+               'right': '20px',
+               'top': '10px',
+               'display': 'block',
+               'height': '35px',
+               'width': '35px'
+           })], href='https://paceconflictlab.wixsite.com/conflict-research-la'),
+        html.A([html.Img(src='data:image/png;base64,{}'.format(git_png),style={
+                'position': 'absolute',
+                'right': '70px',
+                'top': '10px',
+                'display': 'block',
+                'height': '35px',
+                'width': '35px'
+            })], href='https://github.com/ThomasSchinca/shapefinder'),
+        html.A([html.Img(src='data:image/png;base64,{}'.format(twitter_png),style={
+                'position': 'absolute',
+                'right': '120px',
+                'top': '10px',
+                'display': 'block',
+                'height': '35px',
+                'width': '35px'
+            })], href='https://twitter.com/LabConflict')# Logo on the right# Logo on the right
+    ], style={'backgroundColor': '#D3D3D3', 'padding': '8px','marginBottom':20, 'display': 'flex'}),
     html.Div([dcc.Markdown('''Shape Finder is a platform to identify and predict patterns in time series datasets. It lets you search for specific shapes within complex datasets. Through the use of adjustable sliders, you can define the shape you are interested in—be it a sharp peak, a gradual incline, or any other distinctive form. Once defined, Shape Finder sifts through your dataset to find the closest matching patterns.
 	For added clarity and visualization, the application plots the three most similar shapes, allowing you to gauge the accuracy and relevance of the matches. Beyond mere identification, Shape Finder also predicts how these patterns might evolve over the next six periods.
 	Finally, you can download a CSV file which includes all identified shapes and their associated similarity scores.''',
@@ -93,7 +94,7 @@ app.layout = html.Div([
         ]),
         style={'width': '50%','height': '60px','lineHeight': '60px','borderWidth': '1px','borderStyle': 'dashed',
             'borderRadius': '5px','textAlign': 'center','margin':'auto','marginBottom':20}),
-    html.Div(id='file_name',style={'textAlign': 'center'}),
+    html.Div(id='file_name',style={'textAlign': 'center','marginBottom':30,'marginTop':10}),
     dcc.Store(id='store'),
     html.Div(id='output-data-upload'),
     html.Hr(style={'width': '70%','margin':'auto'}),
